@@ -1,0 +1,14 @@
+# Keep Docker images lean and avoid leaking junk
+.git
+.gitignore
+README.md
+*.md
+*.log
+.vscode
+.idea
+node_modules
+frontend
+# Go build cache and test outputs
+**/bin
+**/*.test
+**/coverage.out

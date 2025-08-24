@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: test-go-backend
+    rootDir: backend
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_ENVIRONMENT
+        value: production
+      - key: HTTP_ADDRESS
+        value: :8080
+      - key: CORS_ORIGINS
+        value: https://<your-frontend-domain>  # update after you deploy frontend

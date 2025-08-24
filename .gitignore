@@ -1,0 +1,27 @@
+# === Global ===
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+.vscode/
+.idea/
+node_modules/
+dist/
+coverage/
+# === Frontend (Next.js) ===
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+# === Backend (Go) ===
+backend/bin/
+backend/coverage.out
+# Go build artifacts (safety if built outside /backend)
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
