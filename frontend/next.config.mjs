@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // In dev, if NEXT_PUBLIC_API_URL is not set, proxy /api/* → Go backend /v1/*
     async rewrites() {
-      if (!process.env.NEXT_PUBLIC_API_URL) {
-        return [{ source: "/api/:path*", destination: "http://localhost:8080/v1/:path*" }];
-      }
-      return [];
+      // Use BACKEND_URL (must include /v1) in prod; fall back to local dev
+      const target = process.env.BACKEND_URL || "http://localhost:8080/v1";
+      return [{ source: "/api/:path*", destination: `${target}/:path*` }];
     },
   };
+  
   export default nextConfig;
   
