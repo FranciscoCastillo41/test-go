@@ -6,8 +6,8 @@ import (
 )
 
 type Error struct {
-	Error   string `json:"error`
-	Details string `json:"details, omitempty`
+	Error   string `json:"error"`
+	Details string `json:"details,omitempty"`
 }
 
 func JSON(w http.ResponseWriter, code int, v any) {

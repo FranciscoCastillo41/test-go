@@ -1,59 +1,50 @@
 package httpserver
 
 import (
-	"encoding/json"
 	"net/http"
-	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/FranciscoCastillo41/test-go/backend/internal/config"
+	"github.com/FranciscoCastillo41/test-go/backend/internal/services"
+	"github.com/go-chi/chi/v5"
 )
 
-// BuildRouter returns an http.Handler with basic routes and safe defaults.
-func BuildRouter() http.Handler {
+// Deps collects the services your routes need.
+type Deps struct {
+	Widgets *services.WidgetService
+	// Add more later:
+	// Auth   *services.AuthService
+	// Orders *services.OrderService
+}
 
+// BuildRouter is the single entry point that sets global middleware,
+// health checks, and mounts versioned subrouters (e.g., /v1).
+func BuildRouter(deps Deps) http.Handler {
 	cfg := config.Load()
 
-	// Middlewares
 	r := chi.NewRouter()
+
+	// Global middleware
 	r.Use(SimpleCORS(cfg.CORSOrigins))
 	r.Use(RequestLogger)
+	// r.Use(SimpleRPSLimit(50, 100)) // if you added the limiter
 
-	// Health check
-	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	// Health/liveness
+	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
 
 	// Versioned API
 	r.Route("/v1", func(v1 chi.Router) {
-		// GET demo
-		v1.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-			type hello struct {
-				Message   string `json:"message"`
-				Timestamp string `json:"timestamp"`
-			}
-			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(hello{
-				Message:   "Hello from Go 👋",
-				Timestamp: time.Now().UTC().Format(time.RFC3339),
-			})
-		})
+		// Base demo endpoints (/v1/hello, /v1/echo)
+		v1.Mount("/", BasicRoutes())
 
-		// POST echo demo
-		v1.Post("/echo", func(w http.ResponseWriter, r *http.Request) {
-			var body map[string]any
-			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-				http.Error(w, "invalid JSON", http.StatusBadRequest)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(map[string]any{
-				"received": body,
-				"note":     "It works! You posted JSON and I echoed it back.",
-			})
-		})
+		// Feature endpoints (/v1/widgets/...)
+		v1.Mount("/widgets", WidgetsRoutes(deps.Widgets))
+
+		// More features later:
+		// v1.Mount("/auth",   AuthRoutes(deps.Auth))
+		// v1.Mount("/orders", OrdersRoutes(deps.Orders))
 	})
 
 	return r

@@ -9,6 +9,7 @@ type AppConfig struct {
 	AppEnvironment string // "development" | "production" | etc.
 	HTTPAddress    string // e.g. ":8080"
 	CORSOrigins    string // comma-separated
+	DBURL          string
 }
 
 // Load reads environment variables and applies sensible defaults.
@@ -17,6 +18,7 @@ func Load() AppConfig {
 		AppEnvironment: getEnv("APP_ENVIRONMENT", "development"),
 		HTTPAddress:    getEnv("HTTP_ADDRESS", ":8080"),
 		CORSOrigins:    getEnv("CORS_ORIGINS", "*"),
+		DBURL:          getEnv("DB_URL", ""),
 	}
 }
 
