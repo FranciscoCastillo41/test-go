@@ -23,6 +23,9 @@ func main() {
 	if cfg.DBURL == "" {
 		log.Fatal("DB_URL is required (Supabase Postgres URI, e.g. postgres://user:pass@host:5432/postgres?sslmode=require)")
 	}
+	if cfg.SupabaseJWTSecret == "" {
+		log.Fatal("SUPABASE_JWT_SECRET is required")
+	}
 
 	// database (pgxpool)
 	pool, err := store.OpenPostgres(cfg.DBURL)
@@ -31,23 +34,32 @@ func main() {
 	}
 	defer pool.Close()
 
-	// migrations (MVP: run a single SQL file at startup)
-	if mig, err := os.ReadFile("migrations/001_init.sql"); err == nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if _, err := pool.Exec(ctx, string(mig)); err != nil {
-			log.Fatalf("migration: %v", err)
+	// migrations - run all migration files in order
+	migrationFiles := []string{"migrations/001_init.sql", "migrations/002_init.sql"}
+	for _, migFile := range migrationFiles {
+		if mig, err := os.ReadFile(migFile); err == nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			if _, err := pool.Exec(ctx, string(mig)); err != nil {
+				cancel()
+				log.Fatalf("migration %s failed: %v", migFile, err)
+			}
+			cancel()
+			log.Printf("migration %s applied successfully", migFile)
+		} else {
+			log.Printf("warning: %s not found: %v", migFile, err)
 		}
-	} else {
-		log.Printf("warning: migrations/001_init.sql not found: %v", err)
 	}
 
 	// dependency injection (repos → services → router)
 	widgetRepo := repository.NewPGWidgetRepo(pool)
 	widgetSvc := services.NewWidgetService(widgetRepo)
+	
+	userRepo := repository.NewPGUserRepo(pool)
+	userSvc := services.NewUserService(userRepo)
 
 	router := httpserver.BuildRouter(httpserver.Deps{
 		Widgets: widgetSvc,
+		Users:   userSvc,
 	})
 
 	// HTTP server with timeouts

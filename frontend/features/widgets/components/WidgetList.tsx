@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useWidgets, useDeleteWidget, useDeleteAllWidgets, useUpdateWidget } from "@/features/widgets/hooks";
-import type { Widget } from "@/features/widgets/types";
+import { useWidgets, useDeleteWidget, useDeleteAllWidgets, useUpdateWidget } from "../hooks/useWidgets";
+import type { Widget } from "../types";
 
 function WidgetRow({ w }: { w: Widget }) {
   const delOne = useDeleteWidget();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useCreateWidget } from "@/features/widgets/hooks"
+import { useCreateWidget } from "../hooks/useWidgets"
 
 export default function WidgetForm() {
   const [name, setName] = useState("Test Widget");

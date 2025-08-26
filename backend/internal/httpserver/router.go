@@ -11,6 +11,7 @@ import (
 // Deps collects the services your routes need.
 type Deps struct {
 	Widgets *services.WidgetService
+	Users   *services.UserService
 	// Add more later:
 	// Auth   *services.AuthService
 	// Orders *services.OrderService
@@ -28,6 +29,9 @@ func BuildRouter(deps Deps) http.Handler {
 	r.Use(RequestLogger)
 	// r.Use(SimpleRPSLimit(50, 100)) // if you added the limiter
 
+	// Create JWT middleware
+	jwtMiddleware := SupabaseJWTVerifier(cfg.SupabaseURL, cfg.SupabaseJWTSecret)
+
 	// Health/liveness
 	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -36,11 +40,14 @@ func BuildRouter(deps Deps) http.Handler {
 
 	// Versioned API
 	r.Route("/v1", func(v1 chi.Router) {
-		// Base demo endpoints (/v1/hello, /v1/echo)
+		// Base demo endpoints (/v1/hello, /v1/echo) - public
 		v1.Mount("/", BasicRoutes())
 
-		// Feature endpoints (/v1/widgets/...)
+		// Feature endpoints (/v1/widgets/...) - public for now
 		v1.Mount("/widgets", WidgetsRoutes(deps.Widgets))
+
+		// User endpoints (/v1/users/...) - protected with JWT
+		userRoutes(v1, deps.Users, jwtMiddleware)
 
 		// More features later:
 		// v1.Mount("/auth",   AuthRoutes(deps.Auth))

@@ -3,9 +3,9 @@ import {
     apiPost,
     apiDelete,
     apiPatch
-} from "../../lib/api";
+} from "../../../lib/api";
 
-import type { Widget } from "./types";
+import type { Widget } from "../types";
 
 export function fetchWidgets() {
     return apiGet<Widget[]>("/widgets");

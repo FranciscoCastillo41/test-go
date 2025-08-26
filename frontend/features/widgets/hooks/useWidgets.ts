@@ -8,8 +8,8 @@ import {
     deleteWidget,
     deleteAllWidgets,
     updateWidget
-} from "./api";
-import type { Widget } from "./types";
+} from "../api";
+import type { Widget } from "../types";
 
 export function useWidgets(opts?: { enabled?: boolean }) {
     return useQuery<Widget[]>({

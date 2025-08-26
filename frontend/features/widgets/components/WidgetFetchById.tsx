@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useWidget, useDeleteWidget } from "@/features/widgets/hooks";
+import { useWidget, useDeleteWidget } from "../hooks/useWidgets";
 
 export default function WidgetFetchById() {
   const [id, setId] = useState("");
