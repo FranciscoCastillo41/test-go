@@ -19,5 +19,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server ./cmd/api
 FROM scratch
 WORKDIR /app
 COPY --from=build /app/server .
+COPY --from=build /app/migrations ./migrations
 EXPOSE 8080
 ENTRYPOINT ["./server"]
